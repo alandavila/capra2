@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 using Excel = Microsoft.Office.Interop.Excel;
+using DatabaseLib;
 
 namespace ExportLib
 {
@@ -14,6 +15,10 @@ namespace ExportLib
         Excel.Worksheet xlWorkSheet = null;
         Excel.Range xlRange  = null;
         object misValue = System.Reflection.Missing.Value;
+
+        private List<Bitacora> bitacoras = new List<Bitacora>();
+        List<Bitacora> queriedBitacoras = new List<Bitacora>();
+        private List<Cliente> clientesList = new List<Cliente>();
 
         private List<String> _header = new List<String>() 
             {
@@ -53,7 +58,8 @@ namespace ExportLib
 
             DateTime queryDate = initialdate;
             //query database to get data for report
-
+            bitacoras = DatabaseLib.BitacoraDB.GetSortedBitacoras();
+            clientesList = DatabaseLib.ClientesDB.GetClients();
             //create Excel application
             xlApp = new Microsoft.Office.Interop.Excel.Application();
             //make sure application could be created
@@ -85,9 +91,20 @@ namespace ExportLib
                     if (j >= day_of_week && headerelement != "EMPRESA" && headerelement != "TAMBOS" && headerelement != "   ")
                     {
                         xlWorkSheet.Cells[iniRow + 1, j+iniCol] = queryDate.ToString();
-                        //loop over empresasa and query number of tambos per date
-                        //
-                        //
+                        i = 0;
+                        //loop over empresas and query number of tambos per date
+                        foreach (Cliente cliente in clientesList) 
+                        {
+                            string dummyEmpresa = cliente.Nombre.Trim();
+                            queriedBitacoras = (from bitacora in bitacoras
+                                                where bitacora.Empresa.Trim() == dummyEmpresa
+                                                && bitacora.Fecha >= queryDate
+                                                && bitacora.Fecha < queryDate.AddDays(1)
+                                                select bitacora).ToList<Bitacora>();
+                            if (queriedBitacoras.Count > 0)
+                                xlWorkSheet.Cells[iniRow + 2+i, j + iniCol] = queriedBitacoras[0].NumTambos;
+                            i++;
+                        }
                         if (headerelement == "SÁBADO")
                         {
                             queryDate = queryDate.AddDays(2);

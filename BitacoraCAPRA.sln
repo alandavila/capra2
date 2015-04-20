@@ -1,7 +1,12 @@
 ﻿
-Microsoft Visual Studio Solution File, Format Version 11.00
-# Visual Studio 2010
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2013
+VisualStudioVersion = 12.0.31101.0
+MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BitacoraCAPRA", "BitacoraCAPRA\BitacoraCAPRA.csproj", "{6EDF4930-EF75-4F2F-9B65-10D63509B9E7}"
+	ProjectSection(ProjectDependencies) = postProject
+		{2841EEF7-1A43-4507-A3EA-2737B1B80AB8} = {2841EEF7-1A43-4507-A3EA-2737B1B80AB8}
+	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ValidationLib", "ValidationLib\ValidationLib.csproj", "{A512066A-3A8F-44F8-80DD-1D8B1854F220}"
 EndProject
