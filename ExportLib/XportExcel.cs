@@ -5,6 +5,7 @@ using System.Text;
 using System.Windows.Forms;
 using Excel = Microsoft.Office.Interop.Excel;
 using DatabaseLib;
+using System.Drawing;
 
 namespace ExportLib
 {
@@ -38,6 +39,9 @@ namespace ExportLib
             TimeSpan NumWeeks;
             int reportWeeks = 0;
             int weekCount = 0;
+            //initial and final cells for bordering
+            Excel.Range upLeftCell = null;
+            Excel.Range downRightCell = null;
 
             //start on next monday if initial date lands on Sunday:
             if (initialdate.DayOfWeek == DayOfWeek.Sunday) 
@@ -75,19 +79,33 @@ namespace ExportLib
             //add header
             xlWorkSheet.Cells[iniRow -2   , iniCol+1] = "REPORTE DIARIO DE DISPOSICIÓN ESCAMOCHA";
             setColumnsWidth(14);
-            //add empresas to spreasheet
             int i = iniRow+2,j = 0;
-            foreach (String empresa in empresas) 
-            {
-                xlWorkSheet.Cells[i, iniCol] = empresa.ToString();
-                i++;
-            }
-            //add header for each week including date for each week day:
+
+            //loop over weeks to add to excel report
             while (weekCount <= reportWeeks)
             {
+                //add empresas to spreasheet for each beginning of week
+                i = iniRow + 2;
+                foreach (String empresa in empresas)
+                {
+                    xlWorkSheet.Cells[i, iniCol+j] = empresa.ToString();
+                    i++;
+                }
+
                 foreach (string headerelement in _header)
                 {
+                    //add header for each week including date for each week day:
                     xlWorkSheet.Cells[iniRow, j+iniCol] = headerelement.ToString();
+                    if (headerelement == "EMPRESA") 
+                    {
+                        //get the first and last cell for bordering for each week
+                        upLeftCell = (Excel.Range)xlWorkSheet.Cells[iniRow, j + iniCol];
+                        //column plus 7: Lunes, Martes, ...Sabado , Tambos; row plus numEmpresas plus space
+                        downRightCell = (Excel.Range)xlWorkSheet.Cells[iniRow + clientesList.Count() + 1, j + iniCol + 7];
+                        xlRange = xlWorkSheet.get_Range(upLeftCell, downRightCell);
+                        xlRange.Borders.Color = System.Drawing.Color.Black.ToArgb();
+
+                    }
                     if (j >= day_of_week && headerelement != "EMPRESA" && headerelement != "TAMBOS" && headerelement != "   ")
                     {
                         xlWorkSheet.Cells[iniRow + 1, j+iniCol] = queryDate.ToString();
@@ -120,8 +138,9 @@ namespace ExportLib
             }
 
             //beautify report:
-            xlRange = xlWorkSheet.get_Range("c5", "c8");
-            xlRange.BorderAround(Excel.XlLineStyle.xlContinuous, Excel.XlBorderWeight.xlMedium, Excel.XlColorIndex.xlColorIndexAutomatic, Excel.XlColorIndex.xlColorIndexAutomatic);
+            //xlRange = xlWorkSheet.get_Range("c5", "f8");
+            //xlRange.BorderAround(Excel.XlLineStyle.xlContinuous, Excel.XlBorderWeight.xlMedium, Excel.XlColorIndex.xlColorIndexAutomatic, Excel.XlColorIndex.xlColorIndexAutomatic);
+
             //temporal save here
             SaveReport(@"C:\Reciclados\Reciclados.xls");
         }
